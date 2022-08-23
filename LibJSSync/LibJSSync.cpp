@@ -27,6 +27,7 @@ bool inIgnoreList(char c) {
 			return true;
 		}
 	}
+	return false;
 }
 int pushState(bool newState) {
 	state[stateCounter] = newState;
@@ -53,43 +54,50 @@ void error(const char *str) {
 
 }
 bool beginsWith(string term, string str) {
-	for (int i = 0; i < str.length(); i++) {
+	for (int i = 0; i < term.length(); i++) {
+		
 		if (term[i] != str[i]) return false;
 	}
 	return true;
 }
 bool endsWidth(string ending, string str) {
 	int off = str.length() - ending.length() - 1;
+	
 	for (int i = off; i < str.length(); i++) {
+		
 		if (str[i] != ending[i - off]) return false;
 	}
 	return true;
 }
 /*Reads command and returns string. Also sets the state in specified slot to be false if no command was defined in this line*/
-string readCommand(string line, int slot) {
+void readCommand(string line, int slot, string& result) {
 	if (line.length() < 3) {
-		return "";
+		return;
 	}
-	if (beginsWith("/**", line) && endsWidth("*/", line)) {
-		cout << "Hello world" << endl;
+	
+	if (beginsWith("/**", line)) {
+
+		
 		// This is where we start skipping and trimming whitespace to read the command
-		int off = 3;
+		int off = 2;
 
 		//The variable below represents the offset of the command
 		int commandOff = off;
 		while (inIgnoreList(line[commandOff])) { commandOff++; }
 
-		
+		commandOff +=7;
+		while (inIgnoreList(line[commandOff])) { commandOff++; }
+
 		int off2 = commandOff;
 		
-		while (!inIgnoreList(line[off2])) { off2++; }
-		fprintf(f, "[DEBUG] Command: %s", line.substr(commandOff, off2).c_str());
-
+		while (!(inIgnoreList(line[off2])||line[off2] == '*')) { off2++; }
+		fprintf(f, "[DEBUG] Command: %s\n", line.substr(commandOff, off2 - commandOff).c_str());
+		result = line.substr(commandOff, off2 - commandOff).c_str();
 		setState(slot, true);
-		return line.substr(commandOff, off2);
+		return;
 
 	}
-
+	result = "";
 	setState(slot, false);
 
 	
@@ -110,21 +118,26 @@ bool checkForBMBegin(string str) {
 
 
 int main(int argc, char** argv){
+	if (argc <= 1) {
+		cout << "Not enough arguments!" << endl;
+		return 0 ;
+	}
 	char* inFile = argv[1];
 	printf("Options\n|\n|\nV\n");
-	printf("Input File: %s\n", inFile);
-	ifstream is;
-	is.open(inFile);
+	printf("Input File: %s\n\n\n\n\n", inFile);
+	ifstream is(inFile);
 	int c;
 	
 	
 	
 	int v = 0;
-	string line = "";
-	while (is.good()) {
-		getline(is, line);
-		readCommand(line, 0);
+	string line;
+	string curCommand;
+	while (getline(is, line)) {
 		
+		
+		readCommand(line, 0, curCommand);
+		cout << curCommand << " " << getState(0) << endl;
 
 	}
 	is.close();
