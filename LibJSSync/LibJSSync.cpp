@@ -67,7 +67,9 @@ bool endsWidth(string ending, string str) {
 }
 /*Reads command and returns string. Also sets the state in specified slot to be false if no command was defined in this line*/
 string readCommand(string line, int slot) {
-	if (line.length)
+	if (line.length() < 3) {
+		return "";
+	}
 	if (beginsWith("/**", line) && endsWidth("*/", line)) {
 		cout << "Hello world" << endl;
 		// This is where we start skipping and trimming whitespace to read the command
